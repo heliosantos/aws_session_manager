@@ -1,0 +1,20 @@
+
+connections:
+  - name: Server1
+    protocol: SSH
+    target: i-19fb0d1daaffb42bf
+    localPortNumber: 9922
+    remotePortNumber: 22
+    profile: default
+    command: ssh
+    commandParams: ubuntu@localhost:9922
+    
+  - name: Server1
+    protocol: RDP
+    target: i-19fb0d1daaffb42bf
+    localPortNumber: 9989
+    remotePortNumber: 3389
+    profile: default
+    command: mstsc
+    commandParams: /w:1920 /h:1080 /v:localhost:9989
+  

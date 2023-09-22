@@ -1,0 +1,1 @@
+### A command line UI to manage AWS Session Manager sessions
