@@ -10,9 +10,11 @@ colorCounter = 0
 
 def scale_color(r, g, b):
     f = (curses.COLORS - 1) / 255
-    rgb = (min(round(r * f), curses.COLORS - 1),
-           min(round(g * f), curses.COLORS - 1),
-           min(round(b * f),  curses.COLORS - 1))
+    rgb = (
+        min(round(r * f), curses.COLORS - 1),
+        min(round(g * f), curses.COLORS - 1),
+        min(round(b * f), curses.COLORS - 1),
+    )
     return rgb
 
 
@@ -26,33 +28,43 @@ def get_color(r, g, b):
 
 
 def create_session(target, localPortNumber, remotePortNumber, profile):
-    command = ["aws", "ssm", "start-session",
-               "--target", target,
-               "--document-name", "AWS-StartPortForwardingSession",
-               "--parameters", f"localPortNumber={localPortNumber},portNumber={remotePortNumber}",
-               "--region", "eu-west-2",
-               "--profile", profile]
+    command = [
+        'aws',
+        'ssm',
+        'start-session',
+        '--target',
+        target,
+        '--document-name',
+        'AWS-StartPortForwardingSession',
+        '--parameters',
+        f'localPortNumber={localPortNumber},portNumber={remotePortNumber}',
+        '--region',
+        'eu-west-2',
+        '--profile',
+        profile,
+    ]
 
-    process = subprocess.Popen(command,
-                               stdout=subprocess.PIPE,
-                               stderr=subprocess.PIPE,
-                               creationflags=subprocess.CREATE_NEW_PROCESS_GROUP,
-                               )
+    process = subprocess.Popen(
+        command,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        creationflags=subprocess.CREATE_NEW_PROCESS_GROUP,
+    )
     return process
 
 
 def open_app(command, commandParams):
     commandParams = commandParams.split(' ')
-    process = subprocess.Popen([command] + commandParams,
-                               stdout=subprocess.PIPE,
-                               stderr=subprocess.PIPE,
-                               creationflags=subprocess.CREATE_NEW_PROCESS_GROUP,
-                               )
+    process = subprocess.Popen(
+        [command] + commandParams,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        creationflags=subprocess.CREATE_NEW_PROCESS_GROUP,
+    )
     return process
 
 
 def render(stdscr):
-
     if len(sys.argv) < 2:
         print('config file parameter required')
         exit()
@@ -87,12 +99,18 @@ def render(stdscr):
         printer.clear()
         key = session['key']
 
-        selected_gray = c_light if session['selected'] else c_lightgray if  session['connected'] else c_gray
+        selected_gray = c_light if session['selected'] else c_lightgray if session['connected'] else c_gray
 
         printer.addstr((f'{key}) ' + session['name']).ljust(20), selected_gray)
         printer.addstr((session['protocol']).ljust(10), selected_gray)
 
-        txt, color = ('Connected', c_green) if session['connected'] else ('Connecting...', c_orange) if session['connecting'] else ('Disconnected', c_red)
+        txt, color = (
+            ('Connected', c_green)
+            if session['connected']
+            else ('Connecting...', c_orange)
+            if session['connecting']
+            else ('Disconnected', c_red)
+        )
         printer.addstr(txt, color)
 
         if session['connected']:
@@ -140,10 +158,15 @@ def render(stdscr):
             session['connected'] = False
             session['connecting'] = True
             refresh_session(session)
-            process = create_session(session['target'], session['localPortNumber'], session['remotePortNumber'], session.get('profile', 'default'))
+            process = create_session(
+                session['target'],
+                session['localPortNumber'],
+                session['remotePortNumber'],
+                session.get('profile', 'default'),
+            )
 
             process.stdout.readline()
-            session['connected'] = 'Starting session with SessionId' in process.stdout.readline().decode() 
+            session['connected'] = 'Starting session with SessionId' in process.stdout.readline().decode()
 
             session['process'] = process
             session['connecting'] = False
