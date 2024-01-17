@@ -3,7 +3,7 @@ import time
 import curses
 import sys
 import yaml
-
+from .curses_fix import mywrapper
 
 colorCounter = 0
 
@@ -64,7 +64,8 @@ def open_app(command, commandParams):
     return process
 
 
-def render(stdscr):
+@mywrapper
+def main(stdscr):
     if len(sys.argv) < 2:
         print('config file parameter required')
         exit()
@@ -186,10 +187,6 @@ def render(stdscr):
             time.sleep(0.1)
             refresh_session(session)
     time.sleep(0.1)
-
-
-def main():
-    curses.wrapper(render)
 
 
 if __name__ == '__main__':
