@@ -27,7 +27,13 @@ def get_color(r, g, b):
     return curses.color_pair(colorCounter)
 
 
-def create_session(target, localPortNumber, remotePortNumber, profile):
+def create_session(target, documentName, localPortNumber, remotePortNumber, profile=None, host=None, region=None):
+    parameters = []
+    if host:
+        parameters.append(f'host={host}')
+    parameters.append(f'localPortNumber={localPortNumber}')
+    parameters.append(f'portNumber={remotePortNumber}')
+
     command = [
         'aws',
         'ssm',
@@ -35,15 +41,20 @@ def create_session(target, localPortNumber, remotePortNumber, profile):
         '--target',
         target,
         '--document-name',
-        'AWS-StartPortForwardingSession',
+        documentName,
         '--parameters',
-        f'localPortNumber={localPortNumber},portNumber={remotePortNumber}',
-        '--region',
-        'eu-west-2',
-        '--profile',
-        profile,
+        ','.join(parameters),
     ]
 
+    if region:
+        command.append('--region')
+        command.append(region)
+
+    if profile:
+        command.append('--profile')
+        command.append(profile)
+
+    print(' '.join(command) + '\n')
     process = subprocess.Popen(
         command,
         stdout=subprocess.PIPE,
@@ -161,13 +172,19 @@ def main(stdscr):
             refresh_session(session)
             process = create_session(
                 session['target'],
+                session['documentName'],
                 session['localPortNumber'],
                 session['remotePortNumber'],
-                session.get('profile', 'default'),
+                session.get('profile'),
+                session.get('host'),
+                session.get('region'),
             )
 
-            process.stdout.readline()
-            session['connected'] = 'Starting session with SessionId' in process.stdout.readline().decode()
+            line = process.stdout.readline()
+            print(line)
+            line = process.stdout.readline().decode()
+            print(line)
+            session['connected'] = 'Starting session with SessionId' in line
 
             session['process'] = process
             session['connecting'] = False
