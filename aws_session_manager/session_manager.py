@@ -82,6 +82,7 @@ def main(stdscr):
         exit()
     with open(sys.argv[1]) as f:
         config = yaml.safe_load(f)
+        title = config.get('title', 'AWS Session Manager')
         config = config['connections']
 
     curses.use_default_colors()
@@ -98,7 +99,7 @@ def main(stdscr):
 
     width = curses.COLS
 
-    stdscr.addstr(1, 3, 'AWS Session Manager', c_gray)
+    stdscr.addstr(1, 3, title, c_gray)
     stdscr.refresh()
 
     def refresh_screen(config):
