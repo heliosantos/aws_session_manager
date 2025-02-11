@@ -54,12 +54,14 @@ def create_session(target, documentName, localPortNumber, remotePortNumber, prof
         command.append('--profile')
         command.append(profile)
 
-    print(' '.join(command) + '\n')
+    print('====================')
+    print(' '.join(command))
     process = subprocess.Popen(
         command,
         stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
         creationflags=subprocess.CREATE_NEW_PROCESS_GROUP,
+        text=True,
     )
     return process
 
@@ -69,7 +71,7 @@ def open_app(command, commandParams):
     process = subprocess.Popen(
         [command] + commandParams,
         stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
         creationflags=subprocess.CREATE_NEW_PROCESS_GROUP,
     )
     return process
@@ -156,6 +158,8 @@ def main(stdscr):
             if command := config[i].get('command'):
                 p = open_app(command, config[i].get('commandParams', ''))
                 config[i]['app'] = p
+        elif key == 'x':
+            break
         else:
             refresh_screen(config)
             stdscr.refresh()  # do not remove me because
@@ -181,11 +185,12 @@ def main(stdscr):
                 session.get('region'),
             )
 
-            line = process.stdout.readline()
-            print(line)
-            line = process.stdout.readline().decode()
-            print(line)
-            session['connected'] = 'Starting session with SessionId' in line
+            for _ in range(100):
+                if line := process.stdout.readline().strip():
+                    print(line)
+                    if 'Starting session with SessionId' in line:
+                        session['connected'] = True
+                        break
 
             session['process'] = process
             session['connecting'] = False
