@@ -4,6 +4,18 @@ import curses
 import sys
 import yaml
 from .curses_fix import mywrapper
+import logging
+
+
+logging.basicConfig(
+    handlers=[logging.StreamHandler()],
+    encoding='utf-8',
+    level=logging.INFO,
+    datefmt='%Y-%m-%dT%H:%M:%S',
+    format='%(asctime)s - %(levelname)s - %(message)s',
+)
+
+logger = logging.getLogger(__name__)
 
 colorCounter = 0
 
@@ -54,8 +66,8 @@ def create_session(target, documentName, localPortNumber, remotePortNumber, prof
         command.append('--profile')
         command.append(profile)
 
-    print('====================')
-    print(' '.join(command))
+    logging.info('====================')
+    logging.info(' '.join(command))
     process = subprocess.Popen(
         command,
         stdout=subprocess.PIPE,
@@ -160,6 +172,8 @@ def main(stdscr):
                 config[i]['app'] = p
         elif key == 'x':
             break
+        elif key == 'l':
+            curses.endwin()
         else:
             refresh_screen(config)
             stdscr.refresh()  # do not remove me because
@@ -187,7 +201,7 @@ def main(stdscr):
 
             for _ in range(100):
                 if line := process.stdout.readline().strip():
-                    print(line)
+                    logging.info(line)
                     if 'Starting session with SessionId' in line:
                         session['connected'] = True
                         break
