@@ -5,6 +5,8 @@ connections:
     target: i-19fb0d1daaffb42bf
     localPortNumber: 9922
     remotePortNumber: 22
+    documentName: AWS-StartPortForwardingSessionToRemoteHost
+    region: eu-west-2
     profile: default
     command: ssh
     commandParams: ubuntu@localhost:9922
